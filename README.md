@@ -31,9 +31,11 @@ partially meshed or not meshed at all... due to a tiny edge."* The imported
 CAD contained a microscopic sliver edge smaller than the mesh element size, 
 so no elements could form there — meaning the load had no valid path into 
 the structure.
+![Mesh warning showing Force applied to partially meshed geometry](02-mesh-warning.png)
 
 ### 2. Geometry Was Off-Limits
 Attempted to fix the tiny edge via Examine Geometry / Idealize Geometry — 
 both were unavailable. The imported bodies turned out to be **Polygon 
 Bodies** (faceted geometry, not true CAD solids), so standard geometry-repair 
 tools didn't apply.
+![Polygon Body tree showing faceted geometry, not a CAD solid](03-polygon-bodies.png)
