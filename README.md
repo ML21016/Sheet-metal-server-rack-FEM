@@ -46,6 +46,8 @@ and recreated by selecting **mesh nodes** instead of a geometry face — this
 sidesteps the unmeshed-geometry problem entirely, since a node-based load 
 doesn't depend on the underlying geometry being fully meshed.
 
+![Force dialog with 101 nodes selected on the flat floor](04-node-force-selection.png)
+
 ### 4. Correcting the Load Physics
 Selecting the right nodes required revisiting the original assignment brief, 
 which clarified two things:
@@ -56,6 +58,11 @@ which clarified two things:
 - The true load points were on the flat floor near the front of the shelf, 
   matching the assignment's reference figure.
 
+  ![Reference photo showing where the server unit actually contacts the shelf](06-product-reference-photo.png)
+
 Two compact node clusters were selected on solid floor material (avoiding 
 the perforated louver holes), and the total load was split into two 110.35 N 
 forces to represent the two bearing points shown in the assignment figure.
+
+![Two node clusters selected on solid floor material, avoiding the louver holes](05-node-clusters.png)
+
