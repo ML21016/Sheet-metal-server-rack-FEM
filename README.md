@@ -39,3 +39,23 @@ both were unavailable. The imported bodies turned out to be **Polygon
 Bodies** (faceted geometry, not true CAD solids), so standard geometry-repair 
 tools didn't apply.
 ![Polygon Body tree showing faceted geometry, not a CAD solid](03-polygon-bodies.png)
+
+### 3. Workaround: Load Applied to Mesh, Not Geometry
+Since the geometry couldn't be edited directly, the force load was deleted 
+and recreated by selecting **mesh nodes** instead of a geometry face — this 
+sidesteps the unmeshed-geometry problem entirely, since a node-based load 
+doesn't depend on the underlying geometry being fully meshed.
+
+### 4. Correcting the Load Physics
+Selecting the right nodes required revisiting the original assignment brief, 
+which clarified two things:
+- The applied force (220.7 N) corresponds to 15 kg × 1.5 safety factor × 
+  gravity — the server's weight plus safety margin.
+- The ribbed section of the shelf was actually an **air-circulation louver 
+  feature**, not a load-bearing surface — the servers don't rest on it.
+- The true load points were on the flat floor near the front of the shelf, 
+  matching the assignment's reference figure.
+
+Two compact node clusters were selected on solid floor material (avoiding 
+the perforated louver holes), and the total load was split into two 110.35 N 
+forces to represent the two bearing points shown in the assignment figure.
