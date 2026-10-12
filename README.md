@@ -66,3 +66,51 @@ forces to represent the two bearing points shown in the assignment figure.
 
 ![Two node clusters selected on solid floor material, avoiding the louver holes](05-node-clusters.png)
 
+### 5. New Error: Structural Mechanism
+With the load corrected, Model Setup Check passed with 0 errors and 0 warnings, 
+but the solve failed with a Nastran fatal error:
+`USER FATAL MESSAGE 9137 (SEKRRS): RUN TERMINATED DUE TO EXCESSIVE PIVOT RATIOS IN MATRIX KLL`.
+
+This is a different kind of problem from the meshing warning. It means part of 
+the structure has no stiffness in some direction (a "mechanism"), so the solver 
+cannot compute a unique solution. The Results node stayed on "Inferred" because 
+no output file was produced.
+
+![Nastran fatal error 9137 with the singularity table listing the unstable nodes](07-fatal-error.png)
+
+### 6. Diagnosing the Singularity
+The solver output lists the exact grid points that are unstable. Both flagged 
+nodes (136154 and 136562) sat next to each other on the ribbed wall section.
+
+![The two flagged nodes located on the ribbed wall](08-flagged-nodes.png)
+
+I tested the likely causes one at a time:
+- **Orphan node:** node 136562 is connected to 4 elements, so it is not a 
+  free-floating node.
+- **Duplicate (unmerged) nodes:** the Duplicate Nodes check found none.
+- **`PARAM,K6ROT,100.0`:** adds small stiffness for the shell drilling rotation. 
+  It did not help, because the flagged node was unstable in all six degrees of 
+  freedom, not only one rotation.
+- **`PARAM,AUTOSPC,YES`:** automatically constrains near-zero-stiffness DOFs. 
+  I confirmed both parameters were written into the solver deck, and the run 
+  still failed with the same error. AUTOSPC fixes small numerical singularities, 
+  so its failure pointed to a genuine disconnection in the model.
+
+![Node 136562 and its four connected elements](09-node-connected-elements.png)
+
+![K6ROT and AUTOSPC confirmed present in the solver deck](10-params-in-deck.png)
+
+### 7. Root Cause
+A forced run (with the solver told to continue past mechanisms) produced 
+displacements of about 6 billion mm, and the deformed shape showed the model 
+splitting into two pieces that moved apart from each other.
+
+![Deformed shape showing the model separating into two parts](11-split-deformation.png)
+
+The model is made of two separate Polygon Bodies. They sit next to each other 
+geometrically, but their meshes were never connected along the shared boundary, 
+so one region was structurally floating relative to the rest.
+
+![Polygon Body (1): main floor and middle ribbed section](12-polygon-body-1.png)
+
+![Polygon Body (2): slotted panel on the right](13-polygon-body-2.png)
