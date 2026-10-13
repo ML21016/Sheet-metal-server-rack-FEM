@@ -114,3 +114,55 @@ so one region was structurally floating relative to the rest.
 ![Polygon Body (1): main floor and middle ribbed section](12-polygon-body-1.png)
 
 ![Polygon Body (2): slotted panel on the right](13-polygon-body-2.png)
+
+### 8. Fix: Mesh Mating Condition
+To connect the two Polygon Bodies, I used NX's **Mesh Mating Condition** tool 
+in Automatic Creation mode and selected both bodies. The idealized part had to 
+be fully loaded first, otherwise the tool refused to run. It created 
+**108 Glue Non-Coincident** mesh mating conditions across the boundary, which 
+restored a load path between the two regions. The tool also flagged 102 faces 
+with non-manifold issues and kept them in an output group instead of 
+stopping. After this, the 2D mesh was updated so the new connections were 
+included in the solve.
+
+![Mesh Mating Conditions dialog with Automatic Creation](14-mesh-mating-dialog.png)
+
+![Mesh mating summary: 108 glue connections created](15-mesh-mating-summary.png)
+
+### 9. Final Stabilization
+With `BAILOUT` removed, the solve still stopped with the same fatal error, 
+now at a different pair of nodes (136215 and 140558). The main disconnection 
+was fixed, but smaller gaps remained elsewhere in the model. Rather than 
+chase each one, I set `PARAM,BAILOUT,-1` so Nastran continues past the 
+remaining small mechanisms, and kept `K6ROT` and `AUTOSPC` in place. The 
+solve then completed and produced results.
+
+## Results
+
+- **Maximum displacement:** 0.223 mm.
+- **Maximum von Mises stress:** 72.53 MPa (shell top surface).
+- Displacement varies smoothly across the part, from the fixed screw holes 
+  to the loaded floor area, with no disconnected regions.
+
+![Displacement result, maximum 0.223 mm](16-displacement-result.png)
+
+![Von Mises stress result, maximum 72.53 MPa](17-von-mises-stress.png)
+
+The deformed shape in these plots is scaled up by NX so it is visible. 
+The real displacement is the 0.223 mm shown in the legend.
+
+**Factor of safety:** The shelf material is AISI 1008 hot-rolled steel, with a 
+yield strength of 234 MPa (from the NX material library). Against the maximum 
+von Mises stress of 72.53 MPa, this gives a factor of safety of about **3.2** 
+against yield. The applied load already includes the 50% safety factor from 
+the brief, so this margin is on top of it.
+
+## Limitations
+- Because `BAILOUT` was used, results close to the remaining small gaps 
+  (around nodes 136215 and 140558) may be unreliable. A full fix would 
+  mean stitching those remaining gaps or remeshing from clean geometry.
+- The load was applied to two node patches that approximate the server's 
+  bearing points. Exact foot positions were not given in the brief.
+
+## Tools Used
+Siemens NX (Advanced Simulation), Simcenter Nastran (SOL 101 Linear Statics)
